@@ -7,6 +7,8 @@ Auth0's Advanced Customizations for Universal Login (ACUL) lets you replace any 
 - **Renders social login buttons** (Google, Apple, etc.) dynamically from the transaction context
 
 > **Who is this for?** Developers who want to customize the Auth0 `signup-id` screen using the ACUL React SDK. You should be comfortable with React and have access to an Auth0 dashboard.
+>
+> **Finished code:** [github.com/varnerstanley/auth0-custom-login](https://github.com/varnerstanley/auth0-custom-login) — the complete project with all screens, mock context, CI/CD pipeline, and screenshots.
 
 ---
 
@@ -358,7 +360,7 @@ const AlternativeLogins = ({ identifierMode, onModeChange, hasEmail }: Alternati
 ## Step 7 — Start the Local Dev Server and Preview
 
 ```bash
-cd signup-id-demo
+cd signup-id-demo  # or whatever you named your project
 auth0 acul dev
 ```
 
@@ -467,7 +469,7 @@ See [Auth0's Deployment Workflow docs](https://auth0.com/docs/customize/login-pa
 
 ## Next Steps
 
-- **Add passkey support** — check `transaction.isPasskeyEnabled` and add a `passkeyLogin()` call
+- **Passkey enrollment** — already implemented in the [reference repo](https://github.com/varnerstanley/auth0-custom-login) via `src/screens/passkey-enrollment/` and `src/screens/passkey-enrollment-local/`. Auth0 automatically routes users to these screens when passkey nudging is enabled. The `passkey-enrollment-local` screen includes a "Don't show again" checkbox that calls `abortPasskeyEnrollment({ doNotShowAgain: true })` to suppress future nudges.
 - **Add captcha** — pass `captcha` in the `signup()` payload; Auth0 injects the widget automatically when bot detection is on
 - **Customize the `login-id` screen** — same three-file pattern, swap the import to `@auth0/auth0-acul-react/login-id`
 - **Tailwind theming** — wire Auth0's CSS token variables to Tailwind tokens using the [Tailwind use case guide](https://auth0.com/docs/customize/login-pages/advanced-customizations/acul-use-cases)
