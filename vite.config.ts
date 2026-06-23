@@ -34,6 +34,11 @@ export default defineConfig({
       deny: ["dist"],
     },
   },
+  preview: {
+    port: 55444,
+    strictPort: true,
+    cors: true,
+  },
   clearScreen: false,
   resolve: {
     alias: {
