@@ -89,7 +89,7 @@ The `signup-id` screen requires **Identifier First** mode so Auth0 collects the 
 Scaffold the project with a single command. The `--template` and `--screens` flags skip all interactive prompts:
 
 ```bash
-auth0 acul init signup-id-demo \
+auth0 acul init auth0-custom-login \
   --template "React (with ACUL React SDK)" \
   --screens signup-id
 ```
@@ -105,11 +105,11 @@ When prompted to install npm dependencies, press **Y**:
 The CLI confirms success:
 
 ```
-🎉 Project successfully created in 'signup-id-demo'!
+🎉 Project successfully created in 'auth0-custom-login'!
 📖 Explore the sample app: https://github.com/auth0-samples/auth0-acul-samples
 
 Next Steps:
-  Navigate to signup-id-demo
+  Navigate to auth0-custom-login
   Run npm install if dependencies are not installed
   Start the local dev server using auth0 acul dev
 ```
@@ -121,7 +121,7 @@ Next Steps:
 The CLI generates a complete Vite + React project. The parts you'll touch are highlighted:
 
 ```
-signup-id-demo/
+auth0-custom-login/
 ├── public/
 │   ├── manifest.json                        # Screen registry for the inspector
 │   └── screens/
@@ -360,7 +360,7 @@ const AlternativeLogins = ({ identifierMode, onModeChange, hasEmail }: Alternati
 ## Step 7 — Start the Local Dev Server and Preview
 
 ```bash
-cd signup-id-demo  # or whatever you named your project
+cd auth0-custom-login  # or whatever you named your project
 auth0 acul dev
 ```
 
