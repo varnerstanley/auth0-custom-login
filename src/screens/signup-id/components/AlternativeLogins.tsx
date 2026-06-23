@@ -1,4 +1,5 @@
 import { MFAEmailIcon } from "@/assets/icons/MFAEmailIcon";
+import { MFAPhoneIcon } from "@/assets/icons/MFAPhoneIcon";
 import ULThemeSocialProviderButton from "@/components/ULThemeSocialProviderButton";
 import type { SocialConnection } from "@/utils/helpers/socialUtils";
 import { getSocialProviderDetails } from "@/utils/helpers/socialUtils";
@@ -65,7 +66,7 @@ const AlternativeLogins = ({
         <ULThemeSocialProviderButton
           displayName="Phone"
           buttonText="Use phone number instead"
-          iconComponent={null}
+          iconComponent={<MFAPhoneIcon />}
           onClick={() => onModeChange("phone")}
         />
       )}
