@@ -1,0 +1,17 @@
+{
+  "chosen_template": "react",
+  "screens": [
+    "login-id",
+    "login-password",
+    "login-passwordless-sms-otp",
+    "login-passwordless-email-code",
+    "signup-id",
+    "signup-password",
+    "passkey-enrollment",
+    "passkey-enrollment-local"
+  ],
+  "created_at": "2026-06-20T08:50:29Z",
+  "modified_at": "2026-06-20T08:50:29Z",
+  "app_version": "v2.0.1",
+  "acul_manifest_version": "1.0.0"
+}

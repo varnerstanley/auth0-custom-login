@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "acul-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "signup-id-demo", "run", "dev"],
+      "port": 3000
+    }
+  ]
+}

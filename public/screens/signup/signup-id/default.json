@@ -1,0 +1,73 @@
+{
+  "client": {
+    "id": "your-client-id",
+    "name": "Your App"
+  },
+  "prompt": {
+    "name": "signup"
+  },
+  "screen": {
+    "name": "signup-id",
+    "links": {
+      "login": "https://your-tenant.auth0.com/login"
+    }
+  },
+  "tenant": {
+    "friendly_name": "Your Company",
+    "name": "your-tenant",
+    "enabled_locales": ["en"]
+  },
+  "transaction": {
+    "state": "mock-dev-state",
+    "locale": "en",
+    "country_code": {
+      "code": "US",
+      "prefix": "1"
+    },
+    "connection": {
+      "name": "Username-Password-Authentication",
+      "strategy": "auth0",
+      "options": {
+        "signup_enabled": true,
+        "forgot_password_enabled": true,
+        "flexible_identifiers_active": true,
+        "attributes": {
+          "phone": {
+            "signup_status": "required",
+            "identifier_active": true
+          },
+          "email": {
+            "signup_status": "optional",
+            "identifier_active": true
+          }
+        },
+        "authentication_methods": {
+          "passkey": { "enabled": false },
+          "password": {
+            "enabled": true,
+            "min_length": 8,
+            "policy": "good"
+          }
+        }
+      }
+    },
+    "alternate_connections": [
+      {
+        "name": "google-oauth2",
+        "strategy": "google-oauth2",
+        "options": {
+          "display_name": "Google",
+          "show_as_button": true
+        }
+      },
+      {
+        "name": "apple",
+        "strategy": "apple",
+        "options": {
+          "display_name": "Apple",
+          "show_as_button": true
+        }
+      }
+    ]
+  }
+}
