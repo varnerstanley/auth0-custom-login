@@ -48,7 +48,7 @@ export const getSocialProviderDetails = (
   connection: SocialConnection
 ): SocialProviderDetails => {
   const displayName = generateDisplayName(connection);
-  const iconComponent = getIcon();
+  const iconComponent = getIcon(connection.strategy);
 
   return {
     displayName,

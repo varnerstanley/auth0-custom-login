@@ -1,7 +1,15 @@
 import type { ReactNode } from "react";
 
-import { DefaultConnectionIcon } from "@/assets/icons";
+import { AppleIcon, DefaultConnectionIcon, GoogleIcon } from "@/assets/icons";
 
-export const getIcon = (): ReactNode => {
+const strategyIconMap: Record<string, ReactNode> = {
+  "google-oauth2": <GoogleIcon />,
+  apple: <AppleIcon />,
+};
+
+export const getIcon = (strategy?: string): ReactNode => {
+  if (strategy && strategyIconMap[strategy]) {
+    return strategyIconMap[strategy];
+  }
   return <DefaultConnectionIcon />;
 };
