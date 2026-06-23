@@ -46,6 +46,16 @@ const AlternativeLogins = ({
         />
       )}
 
+      {/* Back to phone — shown at the top when the user has switched to email mode */}
+      {hasEmail && identifierMode === "email" && (
+        <ULThemeSocialProviderButton
+          displayName="Phone"
+          buttonText="Use phone number instead"
+          iconComponent={<MFAPhoneIcon />}
+          onClick={() => onModeChange("phone")}
+        />
+      )}
+
       {hasSocialConnections &&
         alternateConnections.map((connection: SocialConnection) => {
           if (!connection?.name) return null;
@@ -60,16 +70,6 @@ const AlternativeLogins = ({
             />
           );
         })}
-
-      {/* Back to phone — shown when the user has switched to email mode */}
-      {hasEmail && identifierMode === "email" && (
-        <ULThemeSocialProviderButton
-          displayName="Phone"
-          buttonText="Use phone number instead"
-          iconComponent={<MFAPhoneIcon />}
-          onClick={() => onModeChange("phone")}
-        />
-      )}
     </div>
   );
 };
