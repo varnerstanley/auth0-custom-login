@@ -37,9 +37,8 @@ function SignupIdScreen() {
 
   applyAuth0Theme(signupId);
 
-  const socialLoginAlignment = extractTokenValue(
-    "--ul-theme-widget-social-buttons-layout"
-  );
+  const socialLoginAlignment =
+    extractTokenValue("--ul-theme-widget-social-buttons-layout") || "bottom";
 
   const renderSocialLogins = (alignment: "top" | "bottom") => (
     <>
