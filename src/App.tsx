@@ -17,7 +17,7 @@ const ScreenManager = lazy(() => {
 
 export default function App() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={null}>
       <ScreenManager />
     </Suspense>
   );
