@@ -1,19 +1,20 @@
+// @ts-nocheck — imports use destination paths; errors here resolve after copying
+//
 // ALTERNATIVE DESIGN — AlternativeLogins without email/phone toggle buttons
 //
-// Use this alongside SignupIdFormWithToggle.tsx and SignupIdScreenWithToggle.tsx.
-// The email/phone switching is handled by the pill toggle inside the form,
-// so this component only renders social provider connections (Google, Apple, etc.).
+// Use alongside SignupIdFormWithToggle.tsx and SignupIdScreenWithToggle.tsx.
+// The email/phone switching moves into the form's pill toggle, so this
+// component only renders social connections (Google, Apple, etc.).
 //
 // To adopt: copy to src/screens/signup-id/components/AlternativeLogins.tsx
-// and change ../src/ imports back to @/ aliases.
+// (remove the // @ts-nocheck line after copying)
 
-import ULThemeSocialProviderButton from "../src/components/ULThemeSocialProviderButton";
-import type { SocialConnection } from "../src/utils/helpers/socialUtils";
-import { getSocialProviderDetails } from "../src/utils/helpers/socialUtils";
+import ULThemeSocialProviderButton from "@/components/ULThemeSocialProviderButton";
+import type { SocialConnection } from "@/utils/helpers/socialUtils";
+import { getSocialProviderDetails } from "@/utils/helpers/socialUtils";
 
-import { useSignupIdManager } from "../src/screens/signup-id/hooks/useSignupIdManager";
+import { useSignupIdManager } from "../hooks/useSignupIdManager";
 
-// No props needed — the email/phone toggle is inside SignupIdFormWithToggle
 const AlternativeLogins = () => {
   const { alternateConnections, handleFederatedSignup, locales } =
     useSignupIdManager();

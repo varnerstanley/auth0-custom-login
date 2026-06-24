@@ -1,21 +1,17 @@
+// @ts-nocheck — imports use destination paths; errors here resolve after copying
+//
 // ALTERNATIVE DESIGN — Inline pill toggle instead of OR-section buttons
 //
-// This is a reference example. The current signup-id screen toggles between phone
-// and email via "Continue with Email" / "Use phone number instead" buttons in the
-// OR section (AlternativeLogins.tsx). This file shows how to replace that with a
-// pill/tab toggle at the top of the form instead.
+// The current design toggles phone/email via "Continue with Email" /
+// "Use phone number instead" buttons in AlternativeLogins.tsx. This file
+// replaces that with a pill toggle at the top of the form, managing
+// identifierMode state internally instead of receiving it as a prop.
 //
-// To adopt this design:
-//   1. Copy this file to src/screens/signup-id/components/SignupIdForm.tsx
-//      and update imports to use @/ aliases (remove the ../src/ prefix).
-//   2. In src/screens/signup-id/index.tsx:
-//      - Remove identifierMode state and setIdentifierMode
-//      - Remove the identifierMode prop from <SignupIdForm />
-//      - This component manages its own toggle state internally
-//   3. In src/screens/signup-id/components/AlternativeLogins.tsx:
-//      - Remove the "Continue with Email" button (identifierMode === "phone" branch)
-//      - Remove the "Use phone number instead" button (identifierMode === "email" branch)
-//      - The pill toggle inside this form handles switching between modes
+// To adopt:
+//   1. Copy to src/screens/signup-id/components/SignupIdForm.tsx
+//      (remove the // @ts-nocheck line after copying)
+//   2. Copy SignupIdScreenWithToggle.tsx → src/screens/signup-id/index.tsx
+//   3. Copy AlternativeLoginsWithToggle.tsx → src/screens/signup-id/components/AlternativeLogins.tsx
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -32,23 +28,23 @@ import type {
   UsernameValidationResult,
 } from "@auth0/auth0-acul-react/types";
 
-// When copied into src/screens/signup-id/components/, replace ../src/ with @/
-import Captcha from "../src/components/Captcha/index";
-import { ULThemeFloatingLabelField } from "../src/components/form/ULThemeFloatingLabelField";
-import { ULThemeFormMessage } from "../src/components/form/ULThemeFormMessage";
-import { Form, FormField, FormItem } from "../src/components/ui/form";
-import { ULThemeButton } from "../src/components/ULThemeButton";
-import ULThemeCountryCodePicker from "../src/components/ULThemeCountryCodePicker";
-import { ULThemeAlert, ULThemeAlertTitle } from "../src/components/ULThemeError";
-import { useCaptcha } from "../src/hooks/useCaptcha";
-import { transformAuth0CountryCode } from "../src/utils/helpers/countryUtils";
-import { getIndividualIdentifierDetails } from "../src/utils/helpers/identifierUtils";
-import { createUsernameValidator } from "../src/utils/validations";
-import { useSignupIdManager } from "../src/screens/signup-id/hooks/useSignupIdManager";
+import Captcha from "@/components/Captcha/index";
+import { ULThemeFloatingLabelField } from "@/components/form/ULThemeFloatingLabelField";
+import { ULThemeFormMessage } from "@/components/form/ULThemeFormMessage";
+import { Form, FormField, FormItem } from "@/components/ui/form";
+import { ULThemeButton } from "@/components/ULThemeButton";
+import ULThemeCountryCodePicker from "@/components/ULThemeCountryCodePicker";
+import { ULThemeAlert, ULThemeAlertTitle } from "@/components/ULThemeError";
+import { useCaptcha } from "@/hooks/useCaptcha";
+import { transformAuth0CountryCode } from "@/utils/helpers/countryUtils";
+import { getIndividualIdentifierDetails } from "@/utils/helpers/identifierUtils";
+import { createUsernameValidator } from "@/utils/validations";
+
+import { useSignupIdManager } from "../hooks/useSignupIdManager";
 
 type IdentifierMode = "phone" | "email";
 
-function SignupIdFormWithToggle() {
+function SignupIdForm() {
   const {
     transaction,
     handleSignup,
@@ -228,7 +224,7 @@ function SignupIdFormWithToggle() {
           </div>
         )}
 
-        {/* Pill toggle — only rendered when both phone and email are available */}
+        {/* Pill toggle — only shown when both phone and email are available */}
         {hasPhone && hasEmail && (
           <div className="mb-4">
             <div className="grid grid-cols-2 rounded-md border border-input bg-background p-1">
@@ -260,7 +256,6 @@ function SignupIdFormWithToggle() {
           </div>
         )}
 
-        {/* Active identifier field — same filtering logic as SignupIdForm.tsx */}
         {identifierMode === "phone"
           ? renderFields(requiredIdentifiers.filter((id) => id !== "email"), true)
           : renderFields(requiredIdentifiers.includes("email") ? ["email"] : [], requiredIdentifiers.includes("email"))}
@@ -289,4 +284,4 @@ function SignupIdFormWithToggle() {
   );
 }
 
-export default SignupIdFormWithToggle;
+export default SignupIdForm;

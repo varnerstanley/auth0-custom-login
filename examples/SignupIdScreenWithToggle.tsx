@@ -1,38 +1,35 @@
-// ALTERNATIVE DESIGN — Simplified screen index for use with SignupIdFormWithToggle
+// @ts-nocheck — imports use destination paths; errors here resolve after copying
 //
-// Use this alongside SignupIdFormWithToggle.tsx and AlternativeLoginsWithToggle.tsx.
-// identifierMode state is removed because SignupIdFormWithToggle manages it internally.
-// The OR separator now only appears when there are social connections (Google, Apple, etc.),
-// since the phone/email switch lives inside the form as a pill toggle.
+// ALTERNATIVE DESIGN — Simplified screen index for the pill toggle design
+//
+// identifierMode state is removed; SignupIdForm manages it internally.
+// The OR separator now only appears when there are social connections,
+// since phone/email switching lives inside the form as a pill toggle.
 //
 // To adopt: copy to src/screens/signup-id/index.tsx
-// and change ../src/ imports back to @/ aliases.
-// Also update the component imports at the bottom to point to your copied files.
+// (remove the // @ts-nocheck line after copying)
+// This file assumes AlternativeLoginsWithToggle.tsx has been copied to
+// src/screens/signup-id/components/AlternativeLogins.tsx and
+// SignupIdFormWithToggle.tsx has been copied to
+// src/screens/signup-id/components/SignupIdForm.tsx
 
-import { useSignupIdentifiers } from "@auth0/auth0-acul-react/signup-id";
+import ULThemeCard from "@/components/ULThemeCard";
+import ULThemePageLayout from "@/components/ULThemePageLayout";
+import ULThemeSeparator from "@/components/ULThemeSeparator";
+import { extractTokenValue } from "@/utils/helpers/tokenUtils";
+import { applyAuth0Theme } from "@/utils/theme/themeEngine";
 
-import ULThemeCard from "../src/components/ULThemeCard";
-import ULThemePageLayout from "../src/components/ULThemePageLayout";
-import ULThemeSeparator from "../src/components/ULThemeSeparator";
-import { extractTokenValue } from "../src/utils/helpers/tokenUtils";
-import { applyAuth0Theme } from "../src/utils/theme/themeEngine";
-
-// These reference the other example files — when adopting, point these at the
-// components you copied into src/screens/signup-id/components/
-import AlternativeLogins from "./AlternativeLoginsWithToggle";
-import SignupIdForm from "./SignupIdFormWithToggle";
-
-import Footer from "../src/screens/signup-id/components/Footer";
-import Header from "../src/screens/signup-id/components/Header";
-import { useSignupIdManager } from "../src/screens/signup-id/hooks/useSignupIdManager";
+import AlternativeLogins from "./components/AlternativeLogins";
+import Footer from "./components/Footer";
+import Header from "./components/Header";
+import SignupIdForm from "./components/SignupIdForm";
+import { useSignupIdManager } from "./hooks/useSignupIdManager";
 
 function SignupIdScreen() {
   const { signupId, texts, alternateConnections, locales } =
     useSignupIdManager();
 
-  // identifierMode state removed — SignupIdFormWithToggle manages it internally
-
-  // Separator only shows when there are social connections.
+  // Separator only appears when social connections exist.
   // Phone/email switching is inside the form, so it no longer drives the separator.
   const showSeparator = alternateConnections && alternateConnections.length > 0;
 
