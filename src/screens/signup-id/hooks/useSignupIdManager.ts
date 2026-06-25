@@ -24,6 +24,13 @@ export const useSignupIdManager = () => {
   const prefilledEmail = untrustedData?.authorizationParams?.['ext-email'] ?? '';
   const prefilledPhone = untrustedData?.authorizationParams?.['ext-phone'] ?? '';
 
+  // Intent flag: when ?ext-passkey=true is on the authorize URL alongside a
+  // prefilled identifier, the form auto-submits so the user lands directly on
+  // the next step (passkey enrollment). Without it, the identifier is only
+  // pre-filled and the user submits manually.
+  const isPasskeyFlow =
+    (untrustedData?.authorizationParams?.['ext-passkey'] ?? '') === 'true';
+
   const handleSignup = async (payload: SignupOptions): Promise<void> => {
     // Clean and prepare data like login-id pattern
     const options: SignupOptions = {};
@@ -71,5 +78,6 @@ export const useSignupIdManager = () => {
     locales,
     prefilledEmail,
     prefilledPhone,
+    isPasskeyFlow,
   };
 };

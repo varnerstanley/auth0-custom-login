@@ -43,6 +43,7 @@ function SignupIdForm({ identifierMode }: SignupIdFormProps) {
     locales,
     prefilledEmail,
     prefilledPhone,
+    isPasskeyFlow,
   } = useSignupIdManager();
 
   const { errors, hasError, dismiss } = useErrors();
@@ -113,12 +114,19 @@ function SignupIdForm({ identifierMode }: SignupIdFormProps) {
     await handleSignup(data);
   };
 
-  // Auto-submit when email/phone are prefilled via ext-* authorize params.
+  // Auto-submit only for the passkey hand-off: ?ext-passkey=true plus a
+  // prefilled email/phone via ext-* authorize params. Without the flag the
+  // identifier is left pre-filled for the user to submit manually.
   // Skipped when captcha is required — user must solve it manually.
   const hasAutoSubmitted = useRef(false);
   useEffect(() => {
     const hasPrefilledData = !!(prefilledEmail || prefilledPhone);
-    if (hasPrefilledData && !isCaptchaAvailable && !hasAutoSubmitted.current) {
+    if (
+      isPasskeyFlow &&
+      hasPrefilledData &&
+      !isCaptchaAvailable &&
+      !hasAutoSubmitted.current
+    ) {
       hasAutoSubmitted.current = true;
       form.handleSubmit(onSubmit)();
     }

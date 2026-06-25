@@ -17,16 +17,20 @@ import { useSignupIdManager } from "./hooks/useSignupIdManager";
 export type IdentifierMode = "phone" | "email";
 
 function SignupIdScreen() {
-  const { signupId, texts, alternateConnections, locales } =
+  const { signupId, texts, alternateConnections, locales, prefilledEmail, prefilledPhone } =
     useSignupIdManager();
 
   const enabledIdentifiers = useSignupIdentifiers();
   const hasPhone = enabledIdentifiers?.some((id) => id.type === "phone") ?? false;
   const hasEmail = enabledIdentifiers?.some((id) => id.type === "email") ?? false;
 
-  const [identifierMode, setIdentifierMode] = useState<IdentifierMode>(
-    hasPhone ? "phone" : "email"
-  );
+  // Open on whichever identifier was prefilled via ext-* params, so the passed
+  // value is visible in the right field. Falls back to phone-first otherwise.
+  const [identifierMode, setIdentifierMode] = useState<IdentifierMode>(() => {
+    if (prefilledEmail && hasEmail) return "email";
+    if (prefilledPhone && hasPhone) return "phone";
+    return hasPhone ? "phone" : "email";
+  });
 
   const showSeparator =
     (alternateConnections && alternateConnections.length > 0) ||

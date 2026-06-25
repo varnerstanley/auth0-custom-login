@@ -55,6 +55,7 @@ function SignupIdForm() {
     locales,
     prefilledEmail,
     prefilledPhone,
+    isPasskeyFlow,
   } = useSignupIdManager();
 
   const { errors, hasError, dismiss } = useErrors();
@@ -63,9 +64,11 @@ function SignupIdForm() {
   const hasPhone = enabledIdentifiers?.some((id) => id.type === "phone") ?? false;
   const hasEmail = enabledIdentifiers?.some((id) => id.type === "email") ?? false;
 
-  const [identifierMode, setIdentifierMode] = useState<IdentifierMode>(
-    hasPhone ? "phone" : "email"
-  );
+  const [identifierMode, setIdentifierMode] = useState<IdentifierMode>(() => {
+    if (prefilledEmail && hasEmail) return "email";
+    if (prefilledPhone && hasPhone) return "phone";
+    return hasPhone ? "phone" : "email";
+  });
 
   const form = useForm<SignupOptions>({
     defaultValues: {
@@ -127,7 +130,12 @@ function SignupIdForm() {
   const hasAutoSubmitted = useRef(false);
   useEffect(() => {
     const hasPrefilledData = !!(prefilledEmail || prefilledPhone);
-    if (hasPrefilledData && !isCaptchaAvailable && !hasAutoSubmitted.current) {
+    if (
+      isPasskeyFlow &&
+      hasPrefilledData &&
+      !isCaptchaAvailable &&
+      !hasAutoSubmitted.current
+    ) {
       hasAutoSubmitted.current = true;
       form.handleSubmit(onSubmit)();
     }

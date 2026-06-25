@@ -1,6 +1,7 @@
 import {
   federatedSignup,
   signup,
+  useScreen,
   useSignupIdentifiers,
   useTransaction,
   useUntrustedData,
@@ -46,22 +47,22 @@ describe("SignupIdScreen", () => {
   it("should render identifier fields with proper labels", async () => {
     await renderScreen();
 
-    // Required field (phone) - should have asterisk
+    // Default mode is phone (phone is the required identifier), so the phone
+    // field and the optional username show. Email lives behind the mode switch
+    // in the OR section, so it is not rendered in the form here.
     expect(screen.getByLabelText("Phone Number*")).toBeInTheDocument();
-
-    // Optional fields - should have (optional) suffix
-    expect(
-      screen.getByLabelText("Email Address (optional)")
-    ).toBeInTheDocument();
     expect(screen.getByLabelText("Username (optional)")).toBeInTheDocument();
+    expect(
+      screen.queryByLabelText("Email Address (optional)")
+    ).not.toBeInTheDocument();
   });
 
   it("should handle form submission with ScreenTestUtils", async () => {
     await renderScreen();
 
-    // Fill form using ScreenTestUtils
+    // Default mode is phone, so submit phone + username. Email is behind the
+    // mode switch and is not part of this submission.
     await ScreenTestUtils.fillInput(/Phone Number/i, "1234567890");
-    await ScreenTestUtils.fillInput(/Email Address/i, "test@example.com");
     await ScreenTestUtils.fillInput(/Username/i, "testuser");
 
     // Submit using CommonTestData button text
@@ -69,7 +70,6 @@ describe("SignupIdScreen", () => {
 
     expect(signup).toHaveBeenCalledWith({
       phone: "1234567890",
-      email: "test@example.com",
       username: "testuser",
     });
   });
@@ -143,10 +143,13 @@ describe("SignupIdScreen", () => {
       });
     });
 
-    it("should auto-submit when ext-email is provided and email is required", async () => {
+    it("should auto-submit when ext-email and ext-passkey=true are provided and email is required", async () => {
       (useUntrustedData as jest.Mock).mockReturnValue({
         submittedFormData: null,
-        authorizationParams: { "ext-email": "auto@example.com" },
+        authorizationParams: {
+          "ext-email": "auto@example.com",
+          "ext-passkey": "true",
+        },
       });
       // Configure tenant to require email (not phone) so form validation passes
       (useSignupIdentifiers as jest.Mock).mockReturnValueOnce([
@@ -162,12 +165,13 @@ describe("SignupIdScreen", () => {
       );
     });
 
-    it("should auto-submit with both ext-email and ext-phone", async () => {
+    it("should auto-submit with ext-email, ext-phone, and ext-passkey=true", async () => {
       (useUntrustedData as jest.Mock).mockReturnValue({
         submittedFormData: null,
         authorizationParams: {
           "ext-email": "auto@example.com",
           "ext-phone": "+15551234567",
+          "ext-passkey": "true",
         },
       });
 
@@ -183,6 +187,28 @@ describe("SignupIdScreen", () => {
       );
     });
 
+    it("should NOT auto-submit when an identifier is prefilled but ext-passkey flag is absent", async () => {
+      (useUntrustedData as jest.Mock).mockReturnValue({
+        submittedFormData: null,
+        authorizationParams: { "ext-email": "auto@example.com" },
+      });
+
+      await renderScreen();
+
+      expect(signup).not.toHaveBeenCalled();
+    });
+
+    it("should NOT auto-submit when ext-passkey is set but no identifier is prefilled", async () => {
+      (useUntrustedData as jest.Mock).mockReturnValue({
+        submittedFormData: null,
+        authorizationParams: { "ext-passkey": "true" },
+      });
+
+      await renderScreen();
+
+      expect(signup).not.toHaveBeenCalled();
+    });
+
     it("should not auto-submit when no prefill params are present", async () => {
       await renderScreen();
 
@@ -192,21 +218,21 @@ describe("SignupIdScreen", () => {
     it("should not auto-submit when captcha is required", async () => {
       (useUntrustedData as jest.Mock).mockReturnValue({
         submittedFormData: null,
-        authorizationParams: { "ext-email": "auto@example.com" },
+        authorizationParams: {
+          "ext-email": "auto@example.com",
+          "ext-passkey": "true",
+        },
       });
 
-      const { useScreen } = await import("@auth0/auth0-acul-react/signup-id");
-      (useScreen as jest.Mock).mockReturnValueOnce({
-        name: "signup-id",
-        texts: {},
+      // Captcha is screen-wide state — every component that reads the screen
+      // sees it. useScreen() is called by several components (index, form, etc.),
+      // so use mockReturnValue (not ...Once) to cover all of them; otherwise the
+      // form would fall back to the default isCaptchaAvailable: false.
+      const baseScreen = (useScreen as jest.Mock)();
+      (useScreen as jest.Mock).mockReturnValue({
+        ...baseScreen,
         isCaptchaAvailable: true,
-        captchaProvider: "recaptcha",
-        captchaSiteKey: "site-key",
-        captchaImage: null,
         captcha: { provider: "recaptcha", siteKey: "site-key" },
-        links: {},
-        loginLink: "/login",
-        data: {},
       });
 
       await renderScreen();
