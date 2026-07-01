@@ -136,6 +136,10 @@ describe("SignupIdScreen", () => {
   });
 
   describe("auto-submit with prefilled ext-* params", () => {
+    // Snapshot the default mock transaction (its state drives the per-transaction
+    // hand-off key) so we can restore it between tests after per-test overrides.
+    const defaultTransaction = (useTransaction as jest.Mock)();
+
     beforeEach(() => {
       // Reset to default (no prefill) before each test in this block so
       // mockReturnValue overrides from one test don't bleed into the next.
@@ -143,6 +147,7 @@ describe("SignupIdScreen", () => {
         submittedFormData: null,
         authorizationParams: null,
       });
+      (useTransaction as jest.Mock).mockReturnValue(defaultTransaction);
     });
 
     // In the passkey hand-off the screen renders only a spinner (no form or
@@ -254,6 +259,33 @@ describe("SignupIdScreen", () => {
           name: CommonTestData.commonTexts.continue,
         })
       ).toBeInTheDocument();
+    });
+
+    it("auto-submits again for a new transaction, even in the same session (re-initiated from the app)", async () => {
+      (useUntrustedData as jest.Mock).mockReturnValue({
+        submittedFormData: null,
+        authorizationParams: {
+          "ext-email": "auto@example.com",
+          "ext-passkey": "true",
+        },
+      });
+      // First /authorize transaction → hand-off fires.
+      (useTransaction as jest.Mock).mockReturnValue({
+        ...defaultTransaction,
+        state: "txn-1",
+      });
+      await renderHandoff();
+      await waitFor(() => expect(signup).toHaveBeenCalledTimes(1));
+      cleanup();
+
+      // A brand-new /authorize from the app is a new transaction state, so it
+      // auto-submits again despite being the same browser session.
+      (useTransaction as jest.Mock).mockReturnValue({
+        ...defaultTransaction,
+        state: "txn-2",
+      });
+      await renderHandoff();
+      await waitFor(() => expect(signup).toHaveBeenCalledTimes(2));
     });
 
     it("should NOT auto-submit when an identifier is prefilled but ext-passkey flag is absent", async () => {

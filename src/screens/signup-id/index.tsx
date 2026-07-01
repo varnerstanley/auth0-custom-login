@@ -44,6 +44,7 @@ function SignupIdScreen() {
     texts,
     alternateConnections,
     locales,
+    transaction,
     handleSignup,
     isPasskeyFlow,
     prefilledEmail,
@@ -57,13 +58,16 @@ function SignupIdScreen() {
   // Passkey hand-off: when an identifier is prefilled via ext-* params and the
   // ext-passkey flag is set, submit immediately and show only a spinner — so the
   // full signup screen never paints before Auth0 routes to passkey enrollment.
-  // Only on the first visit of the session, though: if we've already handed off
-  // for this identifier, show the editable prefilled form instead of looping.
-  // Captcha also blocks it: the user must solve the challenge on the real form.
+  // Captcha blocks it: the user must solve the challenge on the real form.
+  //
+  // We auto-submit once per Auth0 transaction. transaction.state is unique per
+  // /authorize, so hitting Back returns to the SAME transaction and we show the
+  // editable form instead of looping — while a fresh request from the app is a
+  // NEW transaction that auto-submits again, even in the same browser session.
+  // (Falls back to the identifier if state is somehow unavailable.)
   const prefilledIdentifier = prefilledEmail || prefilledPhone;
-  const handoffKey = prefilledIdentifier
-    ? `${HANDOFF_PREFIX}${prefilledIdentifier}`
-    : "";
+  const handoffScope = transaction?.state || prefilledIdentifier;
+  const handoffKey = handoffScope ? `${HANDOFF_PREFIX}${handoffScope}` : "";
 
   const shouldAutoSubmit =
     isPasskeyFlow &&
