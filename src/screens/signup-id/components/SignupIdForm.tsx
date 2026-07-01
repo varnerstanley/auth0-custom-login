@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import {
@@ -26,13 +26,10 @@ import { getIndividualIdentifierDetails } from "@/utils/helpers/identifierUtils"
 import { createUsernameValidator } from "@/utils/validations";
 
 import { useSignupIdManager } from "../hooks/useSignupIdManager";
-import type { IdentifierMode } from "../index";
 
-interface SignupIdFormProps {
-  identifierMode: IdentifierMode;
-}
+type IdentifierMode = "phone" | "email";
 
-function SignupIdForm({ identifierMode }: SignupIdFormProps) {
+function SignupIdForm() {
   const {
     transaction,
     handleSignup,
@@ -47,6 +44,19 @@ function SignupIdForm({ identifierMode }: SignupIdFormProps) {
   } = useSignupIdManager();
 
   const { errors, hasError, dismiss } = useErrors();
+
+  // Which identifier the form is collecting. Managed here so the pill toggle
+  // can switch between phone and email in place. Opens on whichever identifier
+  // was prefilled via ext-* params, else phone-first.
+  const enabledIdentifiers = useSignupIdentifiers();
+  const hasPhone = enabledIdentifiers?.some((id) => id.type === "phone") ?? false;
+  const hasEmail = enabledIdentifiers?.some((id) => id.type === "email") ?? false;
+
+  const [identifierMode, setIdentifierMode] = useState<IdentifierMode>(() => {
+    if (prefilledEmail && hasEmail) return "email";
+    if (prefilledPhone && hasPhone) return "phone";
+    return hasPhone ? "phone" : "email";
+  });
 
   const form = useForm<SignupOptions>({
     defaultValues: {
@@ -69,9 +79,6 @@ function SignupIdForm({ identifierMode }: SignupIdFormProps) {
     isValid: isUsernameValid,
     errors: userNameErrors,
   }: UsernameValidationResult = useUsernameValidation(userNameValue || "");
-
-  // Get identifiers from transaction
-  const enabledIdentifiers = useSignupIdentifiers();
 
   // Extract required and optional identifiers from the hook data
   const requiredIdentifiers = useMemo(
@@ -239,7 +246,39 @@ function SignupIdForm({ identifierMode }: SignupIdFormProps) {
           </div>
         )}
 
-        {/* Show only the active identifier; the other is offered in the OR section */}
+        {/* Pill toggle — switch identifier in place when both are available */}
+        {hasPhone && hasEmail && (
+          <div className="mb-4">
+            <div className="grid grid-cols-2 rounded-md border border-input bg-background p-1">
+              <button
+                type="button"
+                onClick={() => setIdentifierMode("phone")}
+                className={[
+                  "h-10 rounded-md text-sm font-medium transition",
+                  identifierMode === "phone"
+                    ? "bg-muted text-foreground shadow-sm"
+                    : "bg-transparent text-muted-foreground hover:text-foreground",
+                ].join(" ")}
+              >
+                Phone
+              </button>
+              <button
+                type="button"
+                onClick={() => setIdentifierMode("email")}
+                className={[
+                  "h-10 rounded-md text-sm font-medium transition",
+                  identifierMode === "email"
+                    ? "bg-muted text-foreground shadow-sm"
+                    : "bg-transparent text-muted-foreground hover:text-foreground",
+                ].join(" ")}
+              >
+                Email
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Show only the active identifier based on the pill toggle above */}
         {identifierMode === "phone"
           ? renderFields(requiredIdentifiers.filter((id) => id !== "email"), true)
           : renderFields(requiredIdentifiers.includes("email") ? ["email"] : [], requiredIdentifiers.includes("email"))}

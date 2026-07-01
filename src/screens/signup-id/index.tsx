@@ -1,7 +1,3 @@
-import { useState } from "react";
-
-import { useSignupIdentifiers } from "@auth0/auth0-acul-react/signup-id";
-
 import ULThemeCard from "@/components/ULThemeCard";
 import ULThemePageLayout from "@/components/ULThemePageLayout";
 import ULThemeSeparator from "@/components/ULThemeSeparator";
@@ -14,27 +10,13 @@ import Header from "./components/Header";
 import SignupIdForm from "./components/SignupIdForm";
 import { useSignupIdManager } from "./hooks/useSignupIdManager";
 
-export type IdentifierMode = "phone" | "email";
-
 function SignupIdScreen() {
-  const { signupId, texts, alternateConnections, locales, prefilledEmail, prefilledPhone } =
+  const { signupId, texts, alternateConnections, locales } =
     useSignupIdManager();
 
-  const enabledIdentifiers = useSignupIdentifiers();
-  const hasPhone = enabledIdentifiers?.some((id) => id.type === "phone") ?? false;
-  const hasEmail = enabledIdentifiers?.some((id) => id.type === "email") ?? false;
-
-  // Open on whichever identifier was prefilled via ext-* params, so the passed
-  // value is visible in the right field. Falls back to phone-first otherwise.
-  const [identifierMode, setIdentifierMode] = useState<IdentifierMode>(() => {
-    if (prefilledEmail && hasEmail) return "email";
-    if (prefilledPhone && hasPhone) return "phone";
-    return hasPhone ? "phone" : "email";
-  });
-
-  const showSeparator =
-    (alternateConnections && alternateConnections.length > 0) ||
-    (hasPhone && hasEmail);
+  // Phone/email switching lives in the form's pill toggle, so the separator
+  // only appears when there are social connections to divide from the form.
+  const showSeparator = alternateConnections && alternateConnections.length > 0;
 
   const separatorText = texts?.separatorText || locales.page.separator;
   document.title = texts?.pageTitle || locales.page.title;
@@ -49,11 +31,7 @@ function SignupIdScreen() {
       {alignment === "bottom" && showSeparator && (
         <ULThemeSeparator text={separatorText} />
       )}
-      <AlternativeLogins
-          identifierMode={identifierMode}
-          onModeChange={setIdentifierMode}
-          hasEmail={hasEmail}
-        />
+      <AlternativeLogins />
       {alignment === "top" && showSeparator && (
         <ULThemeSeparator text={separatorText} />
       )}
@@ -66,7 +44,7 @@ function SignupIdScreen() {
       <ULThemeCard className="w-full max-w-[400px] gap-0">
         <Header />
         {socialLoginAlignment === "top" && renderSocialLogins("top")}
-        <SignupIdForm identifierMode={identifierMode} />
+        <SignupIdForm />
         <Footer />
         {socialLoginAlignment === "bottom" && renderSocialLogins("bottom")}
       </ULThemeCard>

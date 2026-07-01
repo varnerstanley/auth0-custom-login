@@ -1,23 +1,12 @@
-import { MFAEmailIcon } from "@/assets/icons/MFAEmailIcon";
-import { MFAPhoneIcon } from "@/assets/icons/MFAPhoneIcon";
 import ULThemeSocialProviderButton from "@/components/ULThemeSocialProviderButton";
 import type { SocialConnection } from "@/utils/helpers/socialUtils";
 import { getSocialProviderDetails } from "@/utils/helpers/socialUtils";
 
 import { useSignupIdManager } from "../hooks/useSignupIdManager";
-import type { IdentifierMode } from "../index";
 
-interface AlternativeLoginsProps {
-  identifierMode: IdentifierMode;
-  onModeChange: (mode: IdentifierMode) => void;
-  hasEmail: boolean;
-}
-
-const AlternativeLogins = ({
-  identifierMode,
-  onModeChange,
-  hasEmail,
-}: AlternativeLoginsProps) => {
+// Phone/email switching lives in the form's pill toggle, so this component only
+// renders social provider connections (Google, Apple, etc.).
+const AlternativeLogins = () => {
   const { alternateConnections, handleFederatedSignup, locales } =
     useSignupIdManager();
 
@@ -28,48 +17,25 @@ const AlternativeLogins = ({
     });
   };
 
-  const hasSocialConnections = alternateConnections && alternateConnections.length > 0;
-
-  if (!hasSocialConnections && !hasEmail) {
+  if (!alternateConnections || alternateConnections.length === 0) {
     return null;
   }
 
   return (
     <div className="space-y-3 mt-2">
-      {/* Email option — shown as a social-style button when phone is the active identifier */}
-      {hasEmail && identifierMode === "phone" && (
-        <ULThemeSocialProviderButton
-          displayName="Email"
-          buttonText={`${locales.social.continueWith} Email`}
-          iconComponent={<MFAEmailIcon />}
-          onClick={() => onModeChange("email")}
-        />
-      )}
-
-      {/* Back to phone — shown at the top when the user has switched to email mode */}
-      {hasEmail && identifierMode === "email" && (
-        <ULThemeSocialProviderButton
-          displayName="Phone"
-          buttonText="Use phone number instead"
-          iconComponent={<MFAPhoneIcon />}
-          onClick={() => onModeChange("phone")}
-        />
-      )}
-
-      {hasSocialConnections &&
-        alternateConnections.map((connection: SocialConnection) => {
-          if (!connection?.name) return null;
-          const { displayName, iconComponent } = getSocialProviderDetails(connection);
-          return (
-            <ULThemeSocialProviderButton
-              key={connection.name}
-              displayName={displayName}
-              buttonText={`${locales.social.continueWith} ${displayName}`}
-              iconComponent={iconComponent}
-              onClick={() => handleConnectionSignup(connection)}
-            />
-          );
-        })}
+      {alternateConnections.map((connection: SocialConnection) => {
+        if (!connection?.name) return null;
+        const { displayName, iconComponent } = getSocialProviderDetails(connection);
+        return (
+          <ULThemeSocialProviderButton
+            key={connection.name}
+            displayName={displayName}
+            buttonText={`${locales.social.continueWith} ${displayName}`}
+            iconComponent={iconComponent}
+            onClick={() => handleConnectionSignup(connection)}
+          />
+        );
+      })}
     </div>
   );
 };
