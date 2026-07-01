@@ -4,6 +4,7 @@
     },
     "heading": {
         "title": "Create a passkey on this device",
+        "subtitle": "Use your fingerprint, face, or screen lock to sign in next time — no password to remember.",
         "logoAltText": "Application Logo"
     },
     "footer": {

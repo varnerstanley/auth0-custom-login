@@ -1,0 +1,28 @@
+{
+  "client": {
+    "id": "your-client-id",
+    "name": "Your App",
+    "logo_uri": ""
+  },
+  "prompt": {
+    "name": "passkey-enrollment"
+  },
+  "screen": {
+    "name": "passkey-enrollment",
+    "texts": {
+      "pageTitle": "Set up a passkey",
+      "title": "Create a passkey on this device"
+    },
+    "links": {},
+    "data": {}
+  },
+  "tenant": {
+    "name": "your-tenant",
+    "friendly_name": "Your Company",
+    "enabled_locales": ["en"]
+  },
+  "transaction": {
+    "state": "mock-dev-state",
+    "locale": "en"
+  }
+}

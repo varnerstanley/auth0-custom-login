@@ -1,55 +1,33 @@
 import { useErrors } from "@auth0/auth0-acul-react/passkey-enrollment";
 import { CustomOptions, ErrorItem } from "@auth0/auth0-acul-react/types";
 
-import {
-  CheckMarkShieldAccent,
-  CheckMarkShieldMask,
-  DeviceGlobeAccent,
-  DeviceGlobeMask,
-  WebAuthPlatform,
-} from "@/assets/icons";
+import { WebAuthPlatform } from "@/assets/icons";
 import { ULThemeButton } from "@/components/ULThemeButton";
 import ULThemeAlert, { ULThemeAlertTitle } from "@/components/ULThemeError";
-import {
-  ULThemeList,
-  ULThemeListDescription,
-  ULThemeListItem,
-  ULThemeListTitle,
-} from "@/components/ULThemeList";
-import { cn } from "@/lib/utils";
+import ULThemeTitle from "@/components/ULThemeTitle";
 import { extractTokenValue } from "@/utils/helpers/tokenUtils";
 
 import { usePasskeyEnrollmentManager } from "../hooks/usePasskeyEnrollmentManager";
 
 /**
- * Passkeys Enrollment Benefits Details Component
- * This component renders the details about the benefits of using passkeys.
+ * Passkey Enrollment — focused, "embedded" hand-off.
+ *
+ * Leads with the platform-authenticator icon and a single primary action.
+ * The button is auto-focused so it takes one tap (or Enter) to reach the
+ * biometric prompt — the one user gesture WebAuthn requires. Everything is
+ * styled from the tenant's ULTheme tokens, so it stays on-brand.
  */
 function Details() {
-  // Extract necessary methods and properties from the custom hook
   const { continuePasskeyEnrollment, texts, locales } =
     usePasskeyEnrollmentManager();
 
   // Use Locales as fallback to SDK texts
+  const titleText = texts?.title || locales.heading.title;
+  const subtitleText = locales.heading.subtitle;
   const buttonText =
     texts?.createButtonText || locales.details.createPasskeyText;
-  const passkeyBenefit1Title =
-    texts?.passkeyBenefit1Title || locales.details.passkeyBenefit1Title;
-  const passkeyBenefit1Description =
-    texts?.passkeyBenefit1Description ||
-    locales.details.passkeyBenefit1Description;
-  const passkeyBenefit2Title =
-    texts?.passkeyBenefit2Title || locales.details.passkeyBenefit2Title;
-  const passkeyBenefit2Description =
-    texts?.passkeyBenefit2Description ||
-    locales.details.passkeyBenefit2Description;
-  const passkeyBenefit3Title =
-    texts?.passkeyBenefit3Title || locales.details.passkeyBenefit3Title;
-  const passkeyBenefit3Description =
-    texts?.passkeyBenefit3Description ||
-    locales.details.passkeyBenefit3Description;
 
-  // Using extractTokenValue utility to extract the Icons Color Value from CSS variable
+  // Icon color from the theme token (falls back to the icon's own default).
   const iconColor = extractTokenValue("--ul-theme-color-icons");
 
   const { errors, hasError, dismiss } = useErrors();
@@ -60,7 +38,7 @@ function Details() {
     .filter((err) => !err.field);
 
   /**
-   * Handles form submission.
+   * Triggers the WebAuthn credential creation (biometric prompt).
    *
    * @param data - (Optional) Form custom data
    */
@@ -68,28 +46,29 @@ function Details() {
     continuePasskeyEnrollment(data);
   };
 
-  // Helper function to render icons dynamically
-  const renderIcon = (
-    IconMask: React.ElementType,
-    IconAccent?: React.ElementType,
-    className?: string
-  ) => (
-    <div className="relative w-15 h-10 left-1.5">
-      <IconMask
-        className={cn("absolute inline-block opacity-[0.5]", className)}
-        color={iconColor}
-      />
-      {IconAccent && (
-        <IconAccent className="absolute inline-block" color={iconColor} />
-      )}
-    </div>
-  );
-
   return (
-    <>
+    <div className="flex flex-col items-center text-center">
+      {/* Hero: the platform-authenticator (passkey) glyph */}
+      <WebAuthPlatform
+        color={iconColor}
+        width={56}
+        height={56}
+        aria-hidden="true"
+        className="mt-2 mb-6"
+      />
+
+      <ULThemeTitle className="mb-2">{titleText}</ULThemeTitle>
+
+      <p
+        className="mb-8"
+        style={{ color: "var(--ul-theme-color-body-text)", opacity: 0.7 }}
+      >
+        {subtitleText}
+      </p>
+
       {/* Display general errors */}
       {hasError && generalErrors.length > 0 && (
-        <div className="space-y-3 mb-4">
+        <div className="w-full space-y-3 mb-4">
           {generalErrors.map((error) => (
             <ULThemeAlert
               key={error.id}
@@ -104,41 +83,15 @@ function Details() {
         </div>
       )}
 
-      <ULThemeList variant="icon">
-        <ULThemeListItem
-          icon={renderIcon(WebAuthPlatform, undefined, "opacity-[1]")}
-        >
-          <ULThemeListTitle children={passkeyBenefit1Title}></ULThemeListTitle>
-          <ULThemeListDescription
-            children={passkeyBenefit1Description}
-          ></ULThemeListDescription>
-        </ULThemeListItem>
-
-        <ULThemeListItem icon={renderIcon(DeviceGlobeMask, DeviceGlobeAccent)}>
-          <ULThemeListTitle children={passkeyBenefit2Title}></ULThemeListTitle>
-          <ULThemeListDescription
-            children={passkeyBenefit2Description}
-          ></ULThemeListDescription>
-        </ULThemeListItem>
-
-        <ULThemeListItem
-          icon={renderIcon(CheckMarkShieldMask, CheckMarkShieldAccent)}
-        >
-          <ULThemeListTitle children={passkeyBenefit3Title}></ULThemeListTitle>
-          <ULThemeListDescription
-            children={passkeyBenefit3Description}
-          ></ULThemeListDescription>
-        </ULThemeListItem>
-      </ULThemeList>
-
-      {/* Create Passkey button */}
+      {/* Primary action — auto-focused so it's one tap / Enter to biometrics */}
       <ULThemeButton
+        autoFocus
         className="w-full"
         onClick={() => onCreateClick({ key: "passkey" })}
       >
         {buttonText}
       </ULThemeButton>
-    </>
+    </div>
   );
 }
 

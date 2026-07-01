@@ -15,6 +15,14 @@
           "variants": ["default"]
         }
       }
+    },
+    {
+      "passkey-enrollment": {
+        "passkey-enrollment": {
+          "path": "/screens/passkey-enrollment/passkey-enrollment",
+          "variants": ["default"]
+        }
+      }
     }
   ]
 }
