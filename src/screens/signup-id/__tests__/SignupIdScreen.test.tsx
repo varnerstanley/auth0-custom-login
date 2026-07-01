@@ -143,7 +143,15 @@ describe("SignupIdScreen", () => {
       });
     });
 
-    it("should auto-submit when ext-email and ext-passkey=true are provided and email is required", async () => {
+    // In the passkey hand-off the screen renders only a spinner (no form or
+    // Continue button), so render directly instead of waiting for the button.
+    const renderHandoff = async () => {
+      await act(async () => {
+        render(<SignupIdScreen />);
+      });
+    };
+
+    it("should auto-submit when ext-email and ext-passkey=true are provided", async () => {
       (useUntrustedData as jest.Mock).mockReturnValue({
         submittedFormData: null,
         authorizationParams: {
@@ -151,18 +159,33 @@ describe("SignupIdScreen", () => {
           "ext-passkey": "true",
         },
       });
-      // Configure tenant to require email (not phone) so form validation passes
-      (useSignupIdentifiers as jest.Mock).mockReturnValueOnce([
-        { type: "email" as const, required: true },
-      ]);
 
-      await renderScreen();
+      await renderHandoff();
 
       await waitFor(() =>
         expect(signup).toHaveBeenCalledWith(
           expect.objectContaining({ email: "auto@example.com" })
         )
       );
+    });
+
+    it("renders only a spinner (not the form) during the hand-off", async () => {
+      (useUntrustedData as jest.Mock).mockReturnValue({
+        submittedFormData: null,
+        authorizationParams: {
+          "ext-email": "auto@example.com",
+          "ext-passkey": "true",
+        },
+      });
+
+      await renderHandoff();
+
+      expect(screen.getByTestId("ul-theme-spinner")).toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", {
+          name: CommonTestData.commonTexts.continue,
+        })
+      ).not.toBeInTheDocument();
     });
 
     it("should auto-submit with ext-email, ext-phone, and ext-passkey=true", async () => {
@@ -175,7 +198,7 @@ describe("SignupIdScreen", () => {
         },
       });
 
-      await renderScreen();
+      await renderHandoff();
 
       await waitFor(() =>
         expect(signup).toHaveBeenCalledWith(
@@ -196,7 +219,7 @@ describe("SignupIdScreen", () => {
         },
       });
 
-      await renderScreen();
+      await renderHandoff();
 
       await waitFor(() =>
         expect(signup).toHaveBeenCalledWith(

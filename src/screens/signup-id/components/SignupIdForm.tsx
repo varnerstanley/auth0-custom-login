@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import {
@@ -40,7 +40,6 @@ function SignupIdForm() {
     locales,
     prefilledEmail,
     prefilledPhone,
-    isPasskeyFlow,
   } = useSignupIdManager();
 
   const { errors, hasError, dismiss } = useErrors();
@@ -120,40 +119,6 @@ function SignupIdForm() {
   const onSubmit = async (data: SignupOptions) => {
     await handleSignup(data);
   };
-
-  // Auto-submit only for the passkey hand-off: ?ext-passkey=true plus a
-  // prefilled email/phone via ext-* authorize params. Without the flag the
-  // identifier is left pre-filled for the user to submit manually.
-  // Skipped when captcha is required — user must solve it manually.
-  //
-  // Submit the prefilled identifiers directly (not via form.handleSubmit) so the
-  // hand-off can't be silently blocked by react-hook-form validation of fields
-  // the user never sees. Server-side validation still applies.
-  const hasAutoSubmitted = useRef(false);
-  useEffect(() => {
-    const hasPrefilledData = !!(prefilledEmail || prefilledPhone);
-    // TEMP diagnostic — remove once the passkey hand-off is confirmed working
-    console.log("[auto-submit]", {
-      isPasskeyFlow,
-      prefilledEmail,
-      prefilledPhone,
-      hasPrefilledData,
-      isCaptchaAvailable,
-    });
-    if (
-      isPasskeyFlow &&
-      hasPrefilledData &&
-      !isCaptchaAvailable &&
-      !hasAutoSubmitted.current
-    ) {
-      hasAutoSubmitted.current = true;
-      handleSignup({
-        email: prefilledEmail || undefined,
-        phone: prefilledPhone || undefined,
-      });
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const renderIdentifierField = (
     identifierType: IdentifierType,
