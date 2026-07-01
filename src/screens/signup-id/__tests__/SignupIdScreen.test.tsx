@@ -187,6 +187,24 @@ describe("SignupIdScreen", () => {
       );
     });
 
+    it("should auto-submit when ext-passkey is '1' (loosened flag)", async () => {
+      (useUntrustedData as jest.Mock).mockReturnValue({
+        submittedFormData: null,
+        authorizationParams: {
+          "ext-email": "auto@example.com",
+          "ext-passkey": "1",
+        },
+      });
+
+      await renderScreen();
+
+      await waitFor(() =>
+        expect(signup).toHaveBeenCalledWith(
+          expect.objectContaining({ email: "auto@example.com" })
+        )
+      );
+    });
+
     it("should NOT auto-submit when an identifier is prefilled but ext-passkey flag is absent", async () => {
       (useUntrustedData as jest.Mock).mockReturnValue({
         submittedFormData: null,
