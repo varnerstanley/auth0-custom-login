@@ -13,6 +13,31 @@ import Header from "./components/Header";
 import SignupIdForm from "./components/SignupIdForm";
 import { useSignupIdManager } from "./hooks/useSignupIdManager";
 
+// The passkey hand-off should auto-submit only the first time the user lands on
+// this screen in a session. sessionStorage persists across the Auth0 page
+// navigations (signup-id -> passkey-enrollment) but clears when the tab closes,
+// so a returning user (Back button, reload, or a failed submit) gets the
+// editable prefilled form instead of being re-submitted in a loop. Reads/writes
+// are guarded so blocked storage just degrades to the previous always-submit
+// behavior.
+const HANDOFF_PREFIX = "passkey-handoff:";
+
+const hasHandedOff = (key: string): boolean => {
+  try {
+    return sessionStorage.getItem(key) === "1";
+  } catch {
+    return false;
+  }
+};
+
+const markHandedOff = (key: string): void => {
+  try {
+    sessionStorage.setItem(key, "1");
+  } catch {
+    // storage unavailable — fall back to auto-submitting on each load
+  }
+};
+
 function SignupIdScreen() {
   const {
     signupId,
@@ -32,14 +57,25 @@ function SignupIdScreen() {
   // Passkey hand-off: when an identifier is prefilled via ext-* params and the
   // ext-passkey flag is set, submit immediately and show only a spinner — so the
   // full signup screen never paints before Auth0 routes to passkey enrollment.
-  // Captcha blocks it: the user must solve the challenge on the real form.
+  // Only on the first visit of the session, though: if we've already handed off
+  // for this identifier, show the editable prefilled form instead of looping.
+  // Captcha also blocks it: the user must solve the challenge on the real form.
+  const prefilledIdentifier = prefilledEmail || prefilledPhone;
+  const handoffKey = prefilledIdentifier
+    ? `${HANDOFF_PREFIX}${prefilledIdentifier}`
+    : "";
+
   const shouldAutoSubmit =
-    isPasskeyFlow && !!(prefilledEmail || prefilledPhone) && !isCaptchaAvailable;
+    isPasskeyFlow &&
+    !!prefilledIdentifier &&
+    !isCaptchaAvailable &&
+    !hasHandedOff(handoffKey);
 
   const hasAutoSubmitted = useRef(false);
   useEffect(() => {
     if (shouldAutoSubmit && !hasAutoSubmitted.current) {
       hasAutoSubmitted.current = true;
+      markHandedOff(handoffKey);
       handleSignup({
         email: prefilledEmail || undefined,
         phone: prefilledPhone || undefined,

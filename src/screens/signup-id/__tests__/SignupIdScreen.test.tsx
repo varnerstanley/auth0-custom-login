@@ -7,7 +7,7 @@ import {
   useUntrustedData,
   useUsernameValidation,
 } from "@auth0/auth0-acul-react/signup-id";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
 
 import { CommonTestData } from "@/test/fixtures/common-data";
 import { ScreenTestUtils } from "@/test/utils/screen-test-utils";
@@ -32,6 +32,8 @@ describe("SignupIdScreen", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Clear the passkey hand-off flag so each test starts a fresh session.
+    sessionStorage.clear();
   });
 
   it("should render screen with basic structure using CommonTestData", async () => {
@@ -226,6 +228,32 @@ describe("SignupIdScreen", () => {
           expect.objectContaining({ email: "auto@example.com" })
         )
       );
+    });
+
+    it("does not auto-submit a second time in the same session (e.g. Back button)", async () => {
+      (useUntrustedData as jest.Mock).mockReturnValue({
+        submittedFormData: null,
+        authorizationParams: {
+          "ext-email": "auto@example.com",
+          "ext-passkey": "true",
+        },
+      });
+
+      // First visit → the hand-off fires and records itself for the session.
+      await renderHandoff();
+      await waitFor(() => expect(signup).toHaveBeenCalledTimes(1));
+
+      // Returning to the screen in the same session (Back / reload): the flag
+      // persists in sessionStorage, so we show the editable form, not a re-submit.
+      cleanup();
+      await renderScreen();
+
+      expect(signup).toHaveBeenCalledTimes(1);
+      expect(
+        screen.getByRole("button", {
+          name: CommonTestData.commonTexts.continue,
+        })
+      ).toBeInTheDocument();
     });
 
     it("should NOT auto-submit when an identifier is prefilled but ext-passkey flag is absent", async () => {
